@@ -1,16 +1,17 @@
 import { GoogleGenAI } from "@google/genai";
 import { AIAnalysisResult } from '../types';
 
-// Ensure API Key is available
+// In Vite via define in config, process.env.API_KEY will be replaced by the string value
 const apiKey = process.env.API_KEY || '';
 
-const ai = new GoogleGenAI({ apiKey });
+// Initialize carefully - if no key, we handle it in the functions
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export const analyzeFinancialData = async (data: string): Promise<AIAnalysisResult> => {
-  if (!apiKey) {
+  if (!ai) {
     return {
       summary: "API Key not configured. Using simulation mode.",
-      recommendations: ["Check process.env.API_KEY", "Deploy to environment with keys"],
+      recommendations: ["Check Vercel Environment Variables", "Add API_KEY to settings"],
       riskLevel: "LOW"
     };
   }
@@ -53,7 +54,7 @@ export const analyzeFinancialData = async (data: string): Promise<AIAnalysisResu
 };
 
 export const forecastInventory = async (itemName: string, history: string): Promise<string> => {
-  if (!apiKey) return "AI Forecasting unavailable (Missing API Key).";
+  if (!ai) return "AI Forecasting unavailable (Missing API Key).";
 
   try {
     const prompt = `
@@ -76,7 +77,7 @@ export const forecastInventory = async (itemName: string, history: string): Prom
 };
 
 export const scoreLead = async (leadData: string): Promise<{score: number, reason: string}> => {
-  if (!apiKey) return { score: 50, reason: "Simulation: API Key missing." };
+  if (!ai) return { score: 50, reason: "Simulation: API Key missing." };
 
   try {
     const prompt = `
