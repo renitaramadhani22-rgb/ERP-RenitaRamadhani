@@ -1,21 +1,11 @@
 import { GoogleGenAI } from "@google/genai";
 import { AIAnalysisResult } from '../types';
 
-// In Vite via define in config, process.env.API_KEY will be replaced by the string value
-const apiKey = process.env.API_KEY || '';
-
-// Initialize carefully - if no key, we handle it in the functions
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+// Initialize the client with the API key from the environment variable.
+// We assume the key is valid and accessible as per guidelines.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const analyzeFinancialData = async (data: string): Promise<AIAnalysisResult> => {
-  if (!ai) {
-    return {
-      summary: "API Key not configured. Using simulation mode.",
-      recommendations: ["Check Vercel Environment Variables", "Add API_KEY to settings"],
-      riskLevel: "LOW"
-    };
-  }
-
   try {
     const prompt = `
       You are an expert Chief Financial Officer. Analyze the following Journal Entries JSON data and provide a financial health summary, 3 actionable recommendations to improve cash flow or reduce cost, and a risk assessment (LOW, MEDIUM, HIGH).
@@ -54,8 +44,6 @@ export const analyzeFinancialData = async (data: string): Promise<AIAnalysisResu
 };
 
 export const forecastInventory = async (itemName: string, history: string): Promise<string> => {
-  if (!ai) return "AI Forecasting unavailable (Missing API Key).";
-
   try {
     const prompt = `
       You are a Supply Chain expert. Based on the following usage history for item "${itemName}", predict the stock depletion date and suggest a reorder quantity.
@@ -77,8 +65,6 @@ export const forecastInventory = async (itemName: string, history: string): Prom
 };
 
 export const scoreLead = async (leadData: string): Promise<{score: number, reason: string}> => {
-  if (!ai) return { score: 50, reason: "Simulation: API Key missing." };
-
   try {
     const prompt = `
       You are a Sales Director. Evaluate this sales lead based on the data provided. Assign a score from 0 to 100 based on likelihood to close. Provide a one sentence reason.
